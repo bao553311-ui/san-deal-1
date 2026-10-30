@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Săn Deal Mỗi Ngày</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1a1d21;--muted:#6b7280;--line:#e3e6ea;--accent:#e8590c;--accent-t:#fff;--chip:#eceff3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--card:#1d2026;--text:#eceef1;--muted:#9aa1ad;--line:#2b2f37;--accent:#ff8a4c;--accent-t:#14161a;--chip:#272b33;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14161a;--card:#1d2026;--text:#eceef1;--muted:#9aa1ad;--line:#2b2f37;--accent:#ff8a4c;--accent-t:#14161a;--chip:#272b33;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.6rem;margin:0}
+.sub{color:var(--muted);margin:4px 0 16px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+input{flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:1rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:0;background:var(--chip);color:var(--text);padding:7px 14px;border-radius:999px;cursor:pointer;font-size:.9rem}
+.chip.on{background:var(--accent);color:var(--accent-t)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.shop{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.name{font-weight:600}
+.price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.new{font-size:1.2rem;font-weight:700;color:var(--accent)}
+.old{color:var(--muted);text-decoration:line-through;font-size:.9rem}
+.off{background:var(--accent);color:var(--accent-t);font-size:.75rem;padding:2px 7px;border-radius:6px;font-weight:600}
+.code{font-size:.82rem;color:var(--muted)}
+.btn{margin-top:auto;text-align:center;background:var(--accent);color:var(--accent-t);text-decoration:none;padding:10px;border-radius:10px;font-weight:600}
+.empty{color:var(--muted);padding:30px 0;text-align:center}
+.foot{margin-top:28px;font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔥 Săn Deal Mỗi Ngày</h1>
+  <p class="sub" id="upd"></p>
+  <div class="bar"><input id="q" type="search" placeholder="Tìm sản phẩm, cửa hàng..."></div>
+  <div class="chips" id="chips"></div>
+  <div class="grid" id="grid"></div>
+  <p class="foot">Trang có chứa liên kết tiếp thị liên kết (affiliate): chúng tôi có thể nhận hoa hồng khi bạn mua qua link, giá của bạn không đổi. Giá và mã giảm có thể thay đổi, vui lòng kiểm tra lại trên trang bán.</p>
+</div>
+<script>
+/* ===== BOT CẬP NHẬT PHẦN NÀY ===== */
+var UPDATED="31/10/2026";
+var DEALS=[
+ {name:"Tai nghe Bluetooth (dữ liệu mẫu)",shop:"Shopee",cat:"Công nghệ",price:249000,old:499000,code:"FREESHIP",link:"#"},
+ {name:"Sạc nhanh 20W (dữ liệu mẫu)",shop:"Lazada",cat:"Công nghệ",price:119000,old:220000,code:"",link:"#"},
+ {name:"Sữa rửa mặt 150ml (dữ liệu mẫu)",shop:"TikTok Shop",cat:"Làm đẹp",price:89000,old:165000,code:"LAMDEP10",link:"#"},
+ {name:"Bình giữ nhiệt 500ml (dữ liệu mẫu)",shop:"Shopee",cat:"Gia dụng",price:159000,old:299000,code:"",link:"#"},
+ {name:"Bỉm quần size L (dữ liệu mẫu)",shop:"Lazada",cat:"Mẹ & bé",price:279000,old:360000,code:"BE20",link:"#"},
+ {name:"Chuột không dây (dữ liệu mẫu)",shop:"Shopee",cat:"Công nghệ",price:99000,old:189000,code:"",link:"#"}
+];
+/* ================================== */
+var cat="Tất cả",grid=document.getElementById("grid"),q=document.getElementById("q"),chips=document.getElementById("chips");
+document.getElementById("upd").textContent="Cập nhật lần cuối: "+UPDATED;
+var fmt=function(n){return n.toLocaleString("vi-VN")+"đ"};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function drawChips(){
+  var cats=["Tất cả"].concat(DEALS.map(function(d){return d.cat}).filter(function(v,i,a){return a.indexOf(v)===i}));
+  chips.innerHTML="";
+  cats.forEach(function(c){var b=document.createElement("button");b.className="chip"+(c===cat?" on":"");b.textContent=c;b.onclick=function(){cat=c;drawChips();draw()};chips.appendChild(b)});
+}
+function draw(){
+  var t=q.value.toLowerCase();
+  var list=DEALS.filter(function(d){return (cat==="Tất cả"||d.cat===cat)&&(d.name+d.shop).toLowerCase().indexOf(t)>-1});
+  if(!list.length){grid.innerHTML='<div class="empty">Chưa có deal phù hợp.</div>';return}
+  grid.innerHTML=list.map(function(d){
+    var off=Math.round((1-d.price/d.old)*100);
+    return '<div class="card"><div class="shop">'+esc(d.shop)+' · '+esc(d.cat)+'</div><div class="name">'+esc(d.name)+'</div>'+
+    '<div class="price"><span class="new">'+fmt(d.price)+'</span><span class="old">'+fmt(d.old)+'</span><span class="off">-'+off+'%</span></div>'+
+    (d.code?'<div class="code">Mã: <b>'+esc(d.code)+'</b></div>':'')+
+    '<a class="btn" href="'+esc(d.link)+'" target="_blank" rel="sponsored noopener">Xem deal</a></div>';
+  }).join("");
+}
+q.oninput=draw;drawChips();draw();
+</script>
+</body>
+</html>
